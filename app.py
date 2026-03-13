@@ -1,0 +1,27 @@
+from flask import Flask,request,jsonify
+import pickle
+
+app = Flask(__name__)
+
+model = pickle.load(open("model.pkl","rb"))
+le = pickle.load(open("encoder.pkl","rb"))
+
+@app.route("/predict",methods=["POST"])
+def predict():
+
+    data = request.json
+
+    input_data=[[
+        data["precipitation"],
+        data["temp_max"],
+        data["temp_min"],
+        data["wind"]
+    ]]
+
+    pred=model.predict(input_data)
+
+    result=le.inverse_transform(pred)
+
+    return jsonify({"weather":result[0]})
+
+app.run()
